@@ -5,8 +5,8 @@ if exists("g:investigate_auto_loaded")
 endif
 let g:investigate_auto_loaded = 1
 
-if !exists("g:investigate_use_dash")
-  let g:investigate_use_dash = 0
+if !exists("g:investigate_use_docsets")
+  let g:investigate_use_docsets = 0
 endif
 " }}}
 
@@ -40,13 +40,9 @@ function! s:Executable()
 endfunction
 " }}}
 
-" Determine whether documentation should open with dash ------ {{{
-function! s:UseDash()
-  if has("mac") && g:investigate_use_dash
-    return 1
-  endif
-
-  return 0
+" Determine whether documentation should open with docset app --- ---{{{
+function! s:UseDocsets()
+  return g:investigate_use_docsets
 endfunction
 " }}}
 
@@ -55,7 +51,7 @@ endfunction
 "   swap out ^e with the executable
 "   ^i at the beginning indicates leave the string as is
 function! s:BuildCommand(filetype, word)
-  let l:searchString = investigate#defaults#SearchStringForFiletype(a:filetype, s:UseDash())
+  let l:searchString = investigate#defaults#SearchStringForFiletype(a:filetype, s:UseDocsets())
   if empty(l:searchString) | return "" | endif
 
   let l:fullstring = substitute(l:searchString, '\M\^s', a:word, "g")

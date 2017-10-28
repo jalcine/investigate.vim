@@ -4,7 +4,7 @@ if exists("g:investigate_loaded_defaults")
 endif
 let g:investigate_loaded_defaults = 1
 
-let s:dashString    = 0
+let s:docsetString    = 0
 let s:searchURL     = 1
 let s:customCommand = 2
 " }}}
@@ -167,8 +167,8 @@ function! s:IdentifierFromString(string)
 endfunction
 " }}}
 
-" Choose file command based on custom, dash or URL ------ {{{
-function! investigate#defaults#SearchStringForFiletype(filetype, forDash)
+" Choose file command based on custom, docset app or URL ------ {{{
+function! investigate#defaults#SearchStringForFiletype(filetype, forDocset)
   " Second call is ok since it won't finish if it's already been loaded
   call investigate#defaults#LoadFolderSpecificSettings()
   call s:LoadSyntaxAliasSettings()
@@ -178,19 +178,19 @@ function! investigate#defaults#SearchStringForFiletype(filetype, forDash)
   let l:syntax = s:SyntaxStringForFiletype(a:filetype)
   if !empty(l:syntax) | let l:type = l:syntax | endif
 
-  return s:SearchStringForSyntax(l:type, a:forDash)
+  return s:SearchStringForSyntax(l:type, a:forDocset)
 endfunction
 
-function! s:SearchStringForSyntax(syntax, forDash)
-  let l:command = s:UserOverrideForSyntax(a:syntax, a:forDash)
+function! s:SearchStringForSyntax(syntax, forDocset)
+  let l:command = s:UserOverrideForSyntax(a:syntax, a:forDocset)
   if !empty(l:command) | return l:command | endif
 
   if s:HasCustomCommandForFiletype(a:syntax)
     let l:command = s:CustomCommandForFiletype(a:syntax)
   endif
 
-  if empty(l:command) && a:forDash
-    let l:command = s:DashStringForFiletype(a:syntax)
+  if empty(l:command) && a:forDocset
+    let l:command = s:DocsetStringForFiletype(a:syntax)
   endif
 
   if empty(l:command)
@@ -221,7 +221,7 @@ function! s:HasMappingForFiletype(filetype)
     return 1
   elseif exists(s:CustomCommandStringForFiletype(a:filetype))
     return 1
-  elseif exists(s:CustomDashStringForFiletype(a:filetype))
+  elseif exists(s:CustomDocsetStringForFiletype(a:filetype))
     return 1
   elseif exists(s:CustomURLStringForFiletype(a:filetype))
     return 1
@@ -234,12 +234,12 @@ endfunction
 " }}}
 
 " Command hierarchy for user defined commands and overrides ------ {{{
-function! s:UserOverrideForSyntax(syntax, forDash)
+function! s:UserOverrideForSyntax(syntax, forDocset)
   let l:command = ""
   if s:UseCustomCommandForFiletype(a:syntax)
     let l:command = s:CustomCommandForFiletype(a:syntax)
-  elseif has("mac") && s:UseDashForFiletype(a:syntax)
-    let l:command = s:DashStringForFiletype(a:syntax)
+  elseif has("mac") && s:UseDocsetForFiletype(a:syntax)
+    let l:command = s:DocsetStringForFiletype(a:syntax)
   elseif s:UseURLForFiletype(a:syntax)
     let l:command = s:URLForFiletype(a:syntax)
   endif
@@ -247,8 +247,8 @@ function! s:UserOverrideForSyntax(syntax, forDash)
   if empty(l:command)
     if exists(s:CustomCommandStringForFiletype(a:syntax))
       let l:command = s:CustomCommandForFiletype(a:syntax)
-    elseif exists(s:CustomDashStringForFiletype(a:syntax))
-      let l:command = s:DashStringForFiletype(a:syntax)
+    elseif exists(s:CustomDocsetStringForFiletype(a:syntax))
+      let l:command = s:DocsetStringForFiletype(a:syntax)
     elseif exists(s:CustomURLStringForFiletype(a:syntax))
       let l:command = s:URLForFiletype(a:syntax)
     endif
@@ -309,32 +309,32 @@ function! s:UseCustomCommandForFiletype(filetype)
 endfunction
 " }}}
 
-" Dash configuration ------ {{{
-function! s:CustomDashStringForFiletype(filetype)
-  return "g:investigate_dash_for_" . a:filetype
+" Docset configuration ------ {{{
+function! s:CustomDocsetStringForFiletype(filetype)
+  return "g:investigate_docset_for_" . a:filetype
 endfunction
 
-function! s:DashStringForFiletype(filetype)
+function! s:DocsetStringForFiletype(filetype)
   let l:string = ""
-  if exists(s:CustomDashStringForFiletype(a:filetype))
-    let l:string = eval(s:CustomDashStringForFiletype(a:filetype))
+  if exists(s:CustomDocsetStringForFiletype(a:filetype))
+    let l:string = eval(s:CustomDocsetStringForFiletype(a:filetype))
   elseif s:HasKeyForFiletype(a:filetype)
-    let l:string = s:defaultLocations[a:filetype][s:dashString]
+    let l:string = s:defaultLocations[a:filetype][s:docsetString]
   endif
 
   if !empty(l:string)
-    return investigate#dash#DashString(l:string)
+    return investigate#dash#DocsetString(l:string)
   endif
   return l:string
 endfunction
 
-function! s:CustomUseDashStringForFiletype(filetype)
-  return "g:investigate_use_dash_for_" . a:filetype
+function! s:CustomUseDocsetStringForFiletype(filetype)
+  return "g:investigate_use_docset_for_" . a:filetype
 endfunction
 
-function! s:UseDashForFiletype(filetype)
-  if exists(s:CustomUseDashStringForFiletype(a:filetype))
-    return eval(s:CustomUseDashStringForFiletype(a:filetype))
+function! s:UseDocsetForFiletype(filetype)
+  if exists(s:CustomUseDocsetStringForFiletype(a:filetype))
+    return eval(s:CustomUseDocsetStringForFiletype(a:filetype))
   endif
 
   return 0
